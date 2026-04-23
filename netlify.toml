@@ -16,8 +16,6 @@
   status = 200
   force = true
 
-[context.production]
-  command = "cd client && npm run build"
 
 [functions]
   directory = "netlify/functions"

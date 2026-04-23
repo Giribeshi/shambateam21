@@ -461,4 +461,4 @@ app.use((error, req, res, next) => {
 });
 
 // Export for Netlify Functions
-module.exports.handler = serverless(app);
+exports.handler = serverless(app);

@@ -6,13 +6,180 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 
-// Import existing modules
-const marketPricesService = require('../../modules/marketPrices');
-const weatherService = require('../../modules/weatherService');
-const farmingAdvisoryService = require('../../modules/farmingAdvisory');
-const diseaseDiagnosisService = require('../../modules/diseaseDiagnosis');
-const cropRecommendationsService = require('../../modules/cropRecommendations');
-const User = require('../../models/User');
+// In-memory user storage for demo
+const users = new Map();
+
+// Demo user
+const demoUser = {
+  id: '2',
+  email: 'farmer@shambasmart.co.tz',
+  name: 'John Farmer',
+  role: 'farmer',
+  location: 'arusha',
+  phone: '+255987654321',
+  farmSize: 'small',
+  primaryCrops: ['maize', 'tomatoes']
+};
+
+// Initialize with demo user
+users.set('farmer@shambasmart.co.tz', {
+  ...demoUser,
+  password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.'
+});
+
+// Inline market prices service
+const marketPricesService = {
+  getMarketPrices: (crop, language = 'en') => {
+    const crops = {
+      maize: { name: language === 'sw' ? 'Mahindi' : 'Maize', basePrice: 45000 },
+      tomatoes: { name: language === 'sw' ? 'Nyanya' : 'Tomatoes', basePrice: 3000 }
+    };
+    
+    const markets = {
+      dar_es_salaam: { name: 'Dar es Salaam' },
+      arusha: { name: 'Arusha' },
+      mwanza: { name: 'Mwanza' }
+    };
+    
+    const data = {
+      crop: crops[crop],
+      markets: Object.entries(markets).map(([key, market]) => ({
+        name: market.name,
+        currentPrice: crops[crop].basePrice * (0.9 + Math.random() * 0.2),
+        trend: Math.random() > 0.5 ? 'up' : 'down',
+        change: (Math.random() * 10 - 5).toFixed(1)
+      })),
+      lastUpdated: new Date().toISOString()
+    };
+    
+    return data;
+  },
+  
+  predictPrices: (crop, weeks = 4, language = 'en') => {
+    const predictions = [];
+    let basePrice = 45000;
+    
+    for (let i = 1; i <= weeks; i++) {
+      basePrice = basePrice * (0.95 + Math.random() * 0.1);
+      predictions.push({
+        week: i,
+        price: Math.round(basePrice),
+        confidence: 75 + Math.random() * 20,
+        factors: ['Seasonal demand', 'Weather conditions', 'Market supply']
+      });
+    }
+    
+    return { crop, predictions };
+  }
+};
+
+// Inline weather service
+const weatherService = {
+  getWeatherData: (location, language = 'en') => {
+    return {
+      location: location,
+      current: {
+        temperature: 25 + Math.random() * 10,
+        humidity: 60 + Math.random() * 20,
+        rainfall: Math.random() * 5,
+        windSpeed: 5 + Math.random() * 10,
+        condition: 'Partly Cloudy'
+      },
+      forecast: Array.from({ length: 7 }, (_, i) => ({
+        day: i + 1,
+        high: 28 + Math.random() * 5,
+        low: 18 + Math.random() * 5,
+        condition: ['Sunny', 'Cloudy', 'Rainy'][Math.floor(Math.random() * 3)]
+      })),
+      advisory: language === 'sw' 
+        ? 'Hali ya hewa inafaa kwa kilimo' 
+        : 'Weather conditions suitable for farming'
+    };
+  }
+};
+
+// Inline farming advisory service
+const farmingAdvisoryService = {
+  getFarmingAdvice: (crop, stage, location, issue, language = 'en') => {
+    return {
+      crop,
+      stage,
+      location,
+      problem: issue || 'General farming guidance',
+      advice: {
+        recommendations: [
+          'Monitor soil moisture regularly',
+          'Apply appropriate fertilizers',
+          'Watch for pest infestations',
+          'Maintain proper irrigation'
+        ],
+        timeline: {
+          immediate: 'Assess current conditions',
+          short: 'Apply necessary treatments',
+          medium: 'Monitor growth progress',
+          long: 'Plan for harvest season'
+        },
+        expectedYield: '2-5 tons per hectare',
+        costs: 'Variable based on inputs',
+        market: 'Check local market prices'
+      }
+    };
+  }
+};
+
+// Inline disease diagnosis service
+const diseaseDiagnosisService = {
+  diagnoseDisease: (description, image, language = 'en') => {
+    const diseases = {
+      'maize': {
+        problem: 'Maize Leaf Blight',
+        confidence: 85,
+        description: 'Common fungal disease affecting maize leaves',
+        symptoms: ['Yellow spots on leaves', 'Brown lesions', 'Leaf wilting'],
+        causes: ['Fungal infection', 'High humidity', 'Poor air circulation'],
+        treatment: {
+          immediate: ['Remove affected leaves', 'Improve ventilation'],
+          chemical: ['Apply fungicide', 'Use resistant varieties'],
+          cultural: ['Crop rotation', 'Proper spacing'],
+          prevention: ['Monitor humidity', 'Early detection']
+        }
+      }
+    };
+    
+    return diseases.maize;
+  }
+};
+
+// Inline crop recommendations service
+const cropRecommendationsService = {
+  getCropRecommendations: (location, soilType, season, goals, language = 'en') => {
+    return {
+      location,
+      recommendations: [
+        {
+          crop: 'Maize',
+          swahiliName: 'Mahindi',
+          suitability: 85,
+          reasons: ['Well-suited to local conditions', 'Good market demand'],
+          expectedYield: '3-5 tons/ha',
+          profitability: 'Medium',
+          marketDemand: 'High',
+          growingSeason: '4-5 months'
+        },
+        {
+          crop: 'Beans',
+          swahiliName: 'Maharage',
+          suitability: 78,
+          reasons: ['Soil improvement', 'Short growing period'],
+          expectedYield: '1-2 tons/ha',
+          profitability: 'Medium',
+          marketDemand: 'High',
+          growingSeason: '2-3 months'
+        }
+      ]
+    };
+  }
+};
 
 const app = express();
 

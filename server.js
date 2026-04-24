@@ -6,20 +6,20 @@ const fs = require('fs');
 require('dotenv').config();
 
 // Initialize database
-const Database = require('./backend/database/init');
+const Database = require('./database/init');
 const database = new Database();
 
 // Import modules
-const diseaseDiagnosis = require('./backend/modules/diseaseDiagnosis');
-const farmingAdvisory = require('./backend/modules/farmingAdvisory');
-const cropRecommendation = require('./backend/modules/cropRecommendation');
-const weatherService = require('./backend/modules/weatherService');
-const languageService = require('./backend/modules/languageService');
+const diseaseDiagnosis = require('./modules/diseaseDiagnosis');
+const farmingAdvisory = require('./modules/farmingAdvisory');
+const cropRecommendation = require('./modules/cropRecommendation');
+const weatherService = require('./modules/weatherService');
+const languageService = require('./modules/languageService');
 
 // Import authentication and market routes
-const authRoutes = require('./backend/routes/auth');
-const marketRoutes = require('./backend/routes/market');
-const { authenticateToken, optionalAuth } = require('./backend/middleware/auth');
+const authRoutes = require('./routes/auth');
+const marketRoutes = require('./routes/market');
+const { authenticateToken, optionalAuth } = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;

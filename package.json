@@ -7,9 +7,9 @@
     "start": "node server.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server.js",
-    "client": "cd client && npm start",
-    "build": "cd client && npm run build",
-    "install-client": "cd client && npm install"
+    "client": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "install-client": "cd frontend && npm install"
   },
   "dependencies": {
     "axios": "^1.6.0",

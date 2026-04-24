@@ -26,6 +26,11 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const { language } = useLanguage();
 
+  // Debug: Log user data to console
+  React.useEffect(() => {
+    console.log('Dashboard - User data:', user);
+  }, [user]);
+
   const translations = {
     en: {
       welcome: 'Welcome back',
@@ -352,22 +357,26 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-2">
                   <MapPin className="w-4 h-4 text-gray-400" />
                   <span className="text-sm text-gray-600">{t.location}:</span>
-                  <span className="text-sm font-medium text-gray-900">{user?.location || 'Not set'}</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {user?.location ? (user.location.charAt(0).toUpperCase() + user.location.slice(1).replace('_', ' ')) : 'Not set'}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <BarChart3 className="w-4 h-4 text-gray-400" />
                   <span className="text-sm text-gray-600">{t.farmSize}:</span>
-                  <span className="text-sm font-medium text-gray-900">{user?.farmSize || 'Not set'}</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {user?.farmSize ? (user.farmSize.charAt(0).toUpperCase() + user.farmSize.slice(1)) : 'Not set'}
+                  </span>
                 </div>
                 <div className="flex items-start space-x-2">
                   <Sprout className="w-4 h-4 text-gray-400 mt-0.5" />
                   <div>
                     <span className="text-sm text-gray-600">{t.primaryCrops}:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {user?.primaryCrops?.length > 0 ? (
+                      {user?.primaryCrops && Array.isArray(user.primaryCrops) && user.primaryCrops.length > 0 ? (
                         user.primaryCrops.map((crop, index) => (
                           <span key={index} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                            {crop}
+                            {crop.charAt(0).toUpperCase() + crop.slice(1)}
                           </span>
                         ))
                       ) : (
@@ -375,6 +384,20 @@ const Dashboard = () => {
                       )}
                     </div>
                   </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-600">Role:</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {user?.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Not set'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-600">Member Since:</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not set'}
+                  </span>
                 </div>
               </div>
             </div>

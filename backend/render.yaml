@@ -1,0 +1,17 @@
+services:
+  # Backend API Service
+  - type: web
+    name: agrimind-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        value: agrimind-jwt-secret-key-2024
+      - key: PORT
+        value: 10000
+    healthCheckPath: /
+    autoDeploy: true

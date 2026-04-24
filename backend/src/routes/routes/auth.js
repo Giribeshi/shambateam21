@@ -159,11 +159,27 @@ router.put('/profile', authenticateToken, async (req, res) => {
 });
 
 // Verify token (for frontend to check if token is valid)
-router.get('/verify', authenticateToken, (req, res) => {
-  res.json({
-    valid: true,
-    user: req.user
-  });
+router.get('/verify', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        valid: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      valid: true,
+      user
+    });
+  } catch (error) {
+    console.error('Token verification error:', error);
+    res.status(500).json({
+      valid: false,
+      message: 'Verification failed'
+    });
+  }
 });
 
 // Logout (client-side token removal, but we can add server-side token blacklisting if needed)

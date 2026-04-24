@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "name": "agrimind-backend",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "JWT_SECRET": "agrimind-jwt-secret-key-2024"
+  }
+}

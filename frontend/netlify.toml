@@ -1,0 +1,20 @@
+[build]
+  publish = "build"
+  command = "npm install && CI=false npm run build"
+
+[build.environment]
+  NODE_ENV = "production"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
+
+[functions]
+  directory = "netlify/functions"

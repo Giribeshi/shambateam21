@@ -1,60 +1,65 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
 class User {
   constructor() {
-    // In production, this would be replaced with a real database
-    this.users = new Map(); // In-memory storage for demo
-    this.initializeDefaultUsers();
+    this.dbPath = path.join(__dirname, '../database/agrimind.db');
+    this.db = null;
+    this.initializeDatabase();
   }
 
-  async initializeDefaultUsers() {
-    // Create a default admin user for testing
-    const adminExists = Array.from(this.users.values()).find(u => u.email === 'admin@agrimind.co.tz');
-    if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-      this.users.set('admin@agrimind.co.tz', {
-        id: '1',
-        email: 'admin@agrimind.co.tz',
-        password: hashedPassword,
-        name: 'Agrimind Admin',
-        role: 'admin',
-        location: 'dar_es_salaam',
-        phone: '+255123456789',
-        farmSize: 'demo',
-        primaryCrops: ['maize', 'tomatoes'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-    }
-
-    // Create a demo farmer user
-    const farmerExists = Array.from(this.users.values()).find(u => u.email === 'farmer@agrimind.co.tz');
-    if (!farmerExists) {
-      const hashedPassword = await bcrypt.hash('farmer123', 10);
-      this.users.set('farmer@agrimind.co.tz', {
-        id: '2',
-        email: 'farmer@agrimind.co.tz',
-        password: hashedPassword,
-        name: 'John Farmer',
-        role: 'farmer',
-        location: 'arusha',
-        phone: '+255987654321',
-        farmSize: 'small',
-        primaryCrops: ['maize', 'beans'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-    }
+  initializeDatabase() {
+    this.db = new sqlite3.Database(this.dbPath, (err) => {
+      if (err) {
+        console.error('Error opening database:', err.message);
+      } else {
+        console.log('Connected to SQLite database for User model');
+      }
+    });
   }
 
   async findByEmail(email) {
-    return this.users.get(email) || null;
+    return new Promise((resolve, reject) => {
+      this.db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          if (row) {
+            // Parse primaryCrops from JSON string to array
+            const user = {
+              ...row,
+              primaryCrops: JSON.parse(row.primaryCrops || '[]')
+            };
+            resolve(user);
+          } else {
+            resolve(null);
+          }
+        }
+      });
+    });
   }
 
   async findById(id) {
-    const users = Array.from(this.users.values());
-    return users.find(user => user.id === id) || null;
+    return new Promise((resolve, reject) => {
+      this.db.get('SELECT * FROM users WHERE id = ?', [id], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          if (row) {
+            // Parse primaryCrops from JSON string to array
+            const user = {
+              ...row,
+              primaryCrops: JSON.parse(row.primaryCrops || '[]')
+            };
+            resolve(user);
+          } else {
+            resolve(null);
+          }
+        }
+      });
+    });
   }
 
   async create(userData) {
@@ -73,16 +78,40 @@ class User {
       location: userData.location || '',
       phone: userData.phone || '',
       farmSize: userData.farmSize || '',
-      primaryCrops: userData.primaryCrops || [],
+      primaryCrops: JSON.stringify(userData.primaryCrops || []),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    this.users.set(userData.email, newUser);
-    
-    // Return user without password
-    const { password, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+    return new Promise((resolve, reject) => {
+      const stmt = `
+        INSERT INTO users (id, email, password, name, role, location, phone, farmSize, primaryCrops, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      this.db.run(stmt, [
+        newUser.id,
+        newUser.email,
+        newUser.password,
+        newUser.name,
+        newUser.role,
+        newUser.location,
+        newUser.phone,
+        newUser.farmSize,
+        newUser.primaryCrops,
+        newUser.createdAt,
+        newUser.updatedAt
+      ], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          // Return user without password
+          const { password, ...userWithoutPassword } = newUser;
+          userWithoutPassword.primaryCrops = JSON.parse(newUser.primaryCrops);
+          resolve(userWithoutPassword);
+        }
+      });
+    });
   }
 
   async validatePassword(email, password) {
@@ -102,26 +131,35 @@ class User {
   }
 
   async updateProfile(id, updateData) {
-    const users = Array.from(this.users.values());
-    const userIndex = users.findIndex(user => user.id === id);
-    
-    if (userIndex === -1) {
-      throw new Error('User not found');
+    // Convert primaryCrops to JSON string if it exists
+    const updateFields = { ...updateData };
+    if (updateFields.primaryCrops) {
+      updateFields.primaryCrops = JSON.stringify(updateFields.primaryCrops);
     }
 
-    const user = users[userIndex];
-    const updatedUser = {
-      ...user,
-      ...updateData,
-      updatedAt: new Date().toISOString()
-    };
+    const setClause = Object.keys(updateFields).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(updateFields);
+    values.push(new Date().toISOString()); // updatedAt
+    values.push(id);
 
-    // Update in the Map
-    this.users.set(user.email, updatedUser);
-    
-    // Return without password
-    const { password, ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword;
+    return new Promise((resolve, reject) => {
+      const stmt = `UPDATE users SET ${setClause}, updatedAt = ? WHERE id = ?`;
+
+      this.db.run(stmt, values, async function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          if (this.changes === 0) {
+            reject(new Error('User not found'));
+          } else {
+            // Get updated user without password
+            const updatedUser = await User.prototype.findById.call({ db: User.prototype.db }, id);
+            const { password, ...userWithoutPassword } = updatedUser;
+            resolve(userWithoutPassword);
+          }
+        }
+      });
+    });
   }
 
   generateToken(user) {
@@ -132,17 +170,36 @@ class User {
         name: user.name, 
         role: user.role 
       },
-      process.env.JWT_SECRET || 'your-secret-key',
+      'shambasmart-jwt-secret-key-2024',
       { expiresIn: '7d' }
     );
   }
 
   async getAllUsers() {
-    const users = Array.from(this.users.values());
-    return users.map(user => {
-      const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
+    return new Promise((resolve, reject) => {
+      this.db.all('SELECT * FROM users', (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          const users = rows.map(row => {
+            const { password, ...userWithoutPassword } = row;
+            userWithoutPassword.primaryCrops = JSON.parse(row.primaryCrops || '[]');
+            return userWithoutPassword;
+          });
+          resolve(users);
+        }
+      });
     });
+  }
+
+  close() {
+    if (this.db) {
+      this.db.close((err) => {
+        if (err) {
+          console.error('Error closing database:', err.message);
+        }
+      });
+    }
   }
 }
 

@@ -13,7 +13,7 @@ const authenticateToken = (req, res, next) => {
     });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+  jwt.verify(token, 'shambasmart-jwt-secret-key-2024', (err, user) => {
     if (err) {
       return res.status(403).json({ 
         error: 'Token invalid',
@@ -46,7 +46,7 @@ const optionalAuth = (req, res, next) => {
     return next();
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+  jwt.verify(token, 'shambasmart-jwt-secret-key-2024', (err, user) => {
     if (err) {
       req.user = null;
     } else {

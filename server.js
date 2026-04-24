@@ -5,6 +5,10 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+// Initialize database
+const Database = require('./database/init');
+const database = new Database();
+
 // Import modules
 const diseaseDiagnosis = require('./modules/diseaseDiagnosis');
 const farmingAdvisory = require('./modules/farmingAdvisory');
@@ -165,9 +169,23 @@ app.use((error, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Agrimind server running on port ${PORT}`);
-  console.log(`Agricultural assistant ready for Tanzanian farmers!`);
-});
+async function startServer() {
+  try {
+    // Initialize database
+    await database.initialize();
+    console.log('Database initialized successfully');
+    
+    // Start server
+    app.listen(PORT, () => {
+      console.log(`Agrimind server running on port ${PORT}`);
+      console.log(`Agricultural assistant ready for Tanzanian farmers!`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 module.exports = app;

@@ -17,8 +17,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Demo mode for frontend-only deployment
-  const isDemoMode = !process.env.REACT_APP_API_URL || window.location.hostname !== 'localhost';
+  // Demo mode for frontend-only deployment (disabled for localhost development)
+  const isDemoMode = false;
 
   // Set up axios defaults for authenticated requests
   useEffect(() => {
@@ -34,74 +34,23 @@ export const AuthProvider = ({ children }) => {
     const verifyToken = async () => {
       if (token) {
         try {
-          // Check if we're in demo mode
-          if (isDemoMode && token === 'demo-token') {
-            // Use demo user data
-            const demoUser = {
-              id: '2',
-              email: 'farmer@shambasmart.co.tz',
-              name: 'John Farmer',
-              role: 'farmer',
-              location: 'arusha',
-              phone: '+255987654321',
-              farmSize: 'small',
-              primaryCrops: ['maize', 'tomatoes']
-            };
-            setUser(demoUser);
-          } else {
-            // Try backend verification
-            const response = await axios.get('/api/auth/verify');
-            setUser(response.data.user);
-          }
+          // Try backend verification
+          const response = await axios.get('/api/auth/verify');
+          setUser(response.data.user);
         } catch (error) {
-          // If backend fails and we're in demo mode, use demo user
-          if (isDemoMode && token === 'demo-token') {
-            const demoUser = {
-              id: '2',
-              email: 'farmer@shambasmart.co.tz',
-              name: 'John Farmer',
-              role: 'farmer',
-              location: 'arusha',
-              phone: '+255987654321',
-              farmSize: 'small',
-              primaryCrops: ['maize', 'tomatoes']
-            };
-            setUser(demoUser);
-          } else {
-            console.error('Token verification failed:', error);
-            logout();
-          }
+          console.error('Token verification failed:', error);
+          logout();
         }
       }
       setIsLoading(false);
     };
 
     verifyToken();
-  }, [token, isDemoMode]);
+  }, [token]);
 
   const login = async (email, password) => {
     try {
       setError('');
-      
-      // Demo mode - bypass backend for frontend-only deployment
-      if (isDemoMode) {
-        const demoUser = {
-          id: '2',
-          email: email || 'farmer@shambasmart.co.tz',
-          name: 'John Farmer',
-          role: 'farmer',
-          location: 'arusha',
-          phone: '+255987654321',
-          farmSize: 'small',
-          primaryCrops: ['maize', 'tomatoes']
-        };
-        
-        setUser(demoUser);
-        setToken('demo-token');
-        localStorage.setItem('agrimind-token', 'demo-token');
-        
-        return { success: true, user: demoUser };
-      }
       
       // Real backend login
       const response = await axios.post('/api/auth/login', { email, password });
@@ -113,26 +62,6 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: userData };
     } catch (error) {
-      // Demo mode fallback
-      if (isDemoMode) {
-        const demoUser = {
-          id: '2',
-          email: email || 'farmer@shambasmart.co.tz',
-          name: 'John Farmer',
-          role: 'farmer',
-          location: 'arusha',
-          phone: '+255987654321',
-          farmSize: 'small',
-          primaryCrops: ['maize', 'tomatoes']
-        };
-        
-        setUser(demoUser);
-        setToken('demo-token');
-        localStorage.setItem('agrimind-token', 'demo-token');
-        
-        return { success: true, user: demoUser };
-      }
-      
       const errorMessage = error.response?.data?.message || 'Login failed';
       setError(errorMessage);
       return { success: false, error: errorMessage };

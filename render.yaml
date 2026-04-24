@@ -1,7 +1,7 @@
 services:
   # Backend API Service
   - type: web
-    name: shambasmart-api
+    name: agrimind-api
     env: node
     plan: free
     buildCommand: npm install
@@ -10,20 +10,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: JWT_SECRET
-        value: shambasmart-jwt-secret-key-2024
+        value: agrimind-jwt-secret-key-2024
       - key: PORT
         value: 10000
     healthCheckPath: /
-    autoDeploy: true
-    
-  # Frontend Service (Optional - can also use Netlify)
-  - type: web
-    name: shambasmart-frontend
-    env: static
-    plan: free
-    buildCommand: cd client && npm install && npm run build
-    publishPath: client/build
-    envVars:
-      - key: REACT_APP_API_URL
-        value: https://shambasmart-api.onrender.com
     autoDeploy: true

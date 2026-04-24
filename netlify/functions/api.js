@@ -5,27 +5,120 @@ const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
-// In-memory user storage for demo
-const users = new Map();
+// Serverless-compatible user storage
+const bcrypt = require('bcryptjs');
 
-// Demo user
-const demoUser = {
-  id: '2',
-  email: 'farmer@shambasmart.co.tz',
-  name: 'John Farmer',
-  role: 'farmer',
-  location: 'arusha',
-  phone: '+255987654321',
-  farmSize: 'small',
-  primaryCrops: ['maize', 'tomatoes']
-};
+class ServerlessUser {
+  constructor() {
+    this.users = new Map();
+    this.initializeDefaultUsers();
+  }
 
-// Initialize with demo user
-users.set('farmer@shambasmart.co.tz', {
-  ...demoUser,
-  password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.'
-});
+  async initializeDefaultUsers() {
+    // Create admin user
+    const adminPassword = await bcrypt.hash('admin123', 10);
+    this.users.set('admin@agrimind.co.tz', {
+      id: '1',
+      email: 'admin@agrimind.co.tz',
+      password: adminPassword,
+      name: 'Agrimind Admin',
+      role: 'admin',
+      location: 'dar_es_salaam',
+      phone: '+255123456789',
+      farmSize: 'demo',
+      primaryCrops: ['maize', 'tomatoes'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    // Create demo farmer user
+    const farmerPassword = await bcrypt.hash('farmer123', 10);
+    this.users.set('farmer@shambasmart.co.tz', {
+      id: '2',
+      email: 'farmer@shambasmart.co.tz',
+      password: farmerPassword,
+      name: 'John Farmer',
+      role: 'farmer',
+      location: 'arusha',
+      phone: '+255987654321',
+      farmSize: 'small',
+      primaryCrops: ['maize', 'tomatoes'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  async findByEmail(email) {
+    return this.users.get(email) || null;
+  }
+
+  async findById(id) {
+    const users = Array.from(this.users.values());
+    return users.find(user => user.id === id) || null;
+  }
+
+  async create(userData) {
+    const existingUser = await this.findByEmail(userData.email);
+    if (existingUser) {
+      throw new Error('User already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const newUser = {
+      id: Date.now().toString(),
+      email: userData.email,
+      password: hashedPassword,
+      name: userData.name,
+      role: 'farmer',
+      location: userData.location || '',
+      phone: userData.phone || '',
+      farmSize: userData.farmSize || '',
+      primaryCrops: userData.primaryCrops || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    this.users.set(userData.email, newUser);
+    
+    // Return user without password
+    const { password, ...userWithoutPassword } = newUser;
+    return userWithoutPassword;
+  }
+
+  async validatePassword(email, password) {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      return null;
+    }
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return null;
+    }
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  generateToken(user) {
+    const jwt = require('jsonwebtoken');
+    return jwt.sign(
+      { 
+        id: user.id, 
+        email: user.email, 
+        name: user.name, 
+        role: user.role 
+      },
+      process.env.JWT_SECRET || 'shambasmart-jwt-secret-key-2024',
+      { expiresIn: '7d' }
+    );
+  }
+}
+
+const User = new ServerlessUser();
 
 // Inline market prices service
 const marketPricesService = {
@@ -235,20 +328,11 @@ app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password, location, phone, farmSize, primaryCrops } = req.body;
 
-    // Check if user already exists
-    const existingUser = User.findByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // Hash password
-    const hashedPassword = await bcryptjs.hash(password, 10);
-
-    // Create user
-    const user = User.create({
+    // Create user using User model
+    const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       location,
       phone,
       farmSize,
@@ -256,26 +340,16 @@ app.post('/api/auth/register', async (req, res) => {
     });
 
     // Generate JWT token
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = User.generateToken(user);
 
     res.status(201).json({
       message: 'User registered successfully',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        location: user.location,
-        role: user.role
-      },
+      user,
       token
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'Registration failed' });
+    res.status(500).json({ message: error.message || 'Registration failed' });
   }
 });
 
@@ -283,36 +357,18 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
-    const user = User.findByEmail(email);
+    // Validate user credentials using User model
+    const user = await User.validatePassword(email, password);
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Check password
-    const isValidPassword = await bcryptjs.compare(password, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
     // Generate JWT token
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = User.generateToken(user);
 
     res.json({
       message: 'Login successful',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        location: user.location,
-        role: user.role,
-        farmSize: user.farmSize,
-        primaryCrops: user.primaryCrops
-      },
+      user,
       token
     });
   } catch (error) {
@@ -321,21 +377,21 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-app.get('/api/auth/verify', authenticateToken, (req, res) => {
-  const user = User.findById(req.user.id);
-  if (!user) {
-    return res.status(404).json({ message: 'User not found' });
-  }
-
-  res.json({
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      location: user.location,
-      role: user.role
+app.get('/api/auth/verify', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-  });
+
+    res.json({
+      valid: true,
+      user
+    });
+  } catch (error) {
+    console.error('Token verification error:', error);
+    res.status(500).json({ message: 'Token verification failed' });
+  }
 });
 
 // Market Prices Routes

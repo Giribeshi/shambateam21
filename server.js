@@ -9,12 +9,12 @@ require('dotenv').config();
 const Database = require('./database/init');
 const database = new Database();
 
-// Import modules
-const diseaseDiagnosis = require('./modules/diseaseDiagnosis');
-const farmingAdvisory = require('./modules/farmingAdvisory');
-const cropRecommendation = require('./modules/cropRecommendation');
-const weatherService = require('./modules/weatherService');
-const languageService = require('./modules/languageService');
+// Import AI-powered modules
+const diseaseDiagnosis = require('./utils/modules/aiDiseaseDiagnosis');
+const farmingAdvisory = require('./utils/modules/farmingAdvisory');
+const cropRecommendation = require('./utils/modules/aiCropRecommendation');
+const weatherService = require('./utils/modules/aiWeatherService');
+const languageService = require('./utils/modules/aiLanguageService');
 
 // Import authentication and market routes
 const authRoutes = require('./routes/auth');

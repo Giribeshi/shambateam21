@@ -193,67 +193,6 @@ const CropRecommendations = () => {
     setResult(null);
 
     try {
-      // Check if we're in demo mode (no backend)
-      if (window.location.hostname !== 'localhost') {
-        // Use demo data - find matching recommendations
-        const demoData = demoCropRecommendations[formData.location];
-        
-        if (demoData) {
-          setResult(demoData);
-        } else {
-          // Fallback to general recommendations
-          setResult({
-            location: formData.location,
-            recommendations: [
-              {
-                crop: 'Maize',
-                swahiliName: 'Mahindi',
-                suitability: 85,
-                reasons: ['Well-suited to local conditions', 'Good market demand'],
-                expectedYield: '3-5 tons/ha',
-                profitability: 'Medium',
-                marketDemand: 'High',
-                growingSeason: '4-5 months',
-                requirements: {
-                  rainfall: '600-900mm',
-                  temperature: '18-30°C',
-                  soil: 'Well-drained soil',
-                  ph: '5.5-7.0'
-                },
-                risks: ['Weather dependency', 'Pest pressure'],
-                opportunities: ['Food security', 'Market stability']
-              },
-              {
-                crop: 'Beans',
-                swahiliName: 'Maharage',
-                suitability: 78,
-                reasons: ['Soil improvement', 'Short growing period'],
-                expectedYield: '1-2 tons/ha',
-                profitability: 'Medium',
-                marketDemand: 'High',
-                growingSeason: '2-3 months',
-                requirements: {
-                  rainfall: '400-600mm',
-                  temperature: '15-25°C',
-                  soil: 'Well-drained soil',
-                  ph: '6.0-7.0'
-                },
-                risks: ['Disease susceptibility', 'Price fluctuation'],
-                opportunities: ['Nutritional value', 'Export potential']
-              }
-            ],
-            overall: {
-              bestChoice: 'Maize',
-              diversification: 'Maize + Beans',
-              marketStrategy: 'Focus on local markets',
-              riskManagement: 'Diversify crops'
-            }
-          });
-        }
-        setIsLoading(false);
-        return;
-      }
-
       const response = await axios.post('/api/recommend-crops', {
         ...formData,
         language: language

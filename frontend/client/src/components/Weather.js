@@ -125,19 +125,6 @@ const Weather = () => {
     setWeatherData(null);
 
     try {
-      // Check if we're in demo mode (no backend)
-      if (window.location.hostname !== 'localhost') {
-        // Use demo data
-        const demoData = demoWeatherData[selectedLocation];
-        if (demoData) {
-          setWeatherData(demoData);
-        } else {
-          setError(language === 'en' ? 'Weather data not available for this location' : 'Data ya hali ya hewa haipatikani kwa eneo hili');
-        }
-        setIsLoading(false);
-        return;
-      }
-
       const response = await axios.get(`/api/weather/${selectedLocation}`, {
         params: {
           language: language

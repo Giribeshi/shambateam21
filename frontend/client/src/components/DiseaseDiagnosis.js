@@ -105,50 +105,6 @@ const DiseaseDiagnosis = () => {
     setResult(null);
 
     try {
-      // Check if we're in demo mode (no backend)
-      if (window.location.hostname !== 'localhost') {
-        // Use demo data - analyze description to find matching disease
-        const desc = description.toLowerCase();
-        let matchedDisease = null;
-        
-        // Simple keyword matching for demo
-        if (desc.includes('maize') || desc.includes('mahindi')) {
-          if (desc.includes('leaf') || desc.includes('majani')) {
-            matchedDisease = demoDiseaseDiagnosis['maize_leaf_blight'];
-          }
-        } else if (desc.includes('tomato') || desc.includes('nyanya')) {
-          if (desc.includes('wilt') || desc.includes('kunyauka')) {
-            matchedDisease = demoDiseaseDiagnosis['tomato_bacterial_wilt'];
-          }
-        }
-        
-        // Fallback to generic diagnosis
-        if (!matchedDisease) {
-          matchedDisease = {
-            problem: 'General Crop Issue',
-            confidence: 75,
-            description: 'Based on your description, this appears to be a common crop issue that requires attention',
-            symptoms: [description],
-            causes: ['Environmental factors', 'Nutrient imbalance', 'Possible disease or pest'],
-            treatment: {
-              immediate: ['Monitor the affected plants closely', 'Isolate if possible'],
-              chemical: ['Apply appropriate treatment based on specific diagnosis'],
-              cultural: ['Improve growing conditions', 'Ensure proper irrigation'],
-              prevention: ['Regular monitoring', 'Proper crop management']
-            },
-            impact: {
-              yieldLoss: 'Depends on severity and timing',
-              economicImpact: 'Variable based on treatment effectiveness',
-              spread: 'Preventable with proper management'
-            }
-          };
-        }
-        
-        setResult(matchedDisease);
-        setIsLoading(false);
-        return;
-      }
-
       const formData = new FormData();
       if (selectedImage) {
         formData.append('image', selectedImage);

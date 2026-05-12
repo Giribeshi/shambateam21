@@ -178,46 +178,6 @@ const FarmingAdvisory = () => {
     setResult(null);
 
     try {
-      // Check if we're in demo mode (no backend)
-      if (window.location.hostname !== 'localhost') {
-        // Use demo data - find matching advice
-        const key = `${formData.crop}_${formData.stage}`;
-        const demoData = demoFarmingAdvice[key];
-        
-        if (demoData) {
-          setResult(demoData);
-        } else {
-          // Fallback to general advice
-          setResult({
-            crop: formData.crop,
-            stage: formData.stage,
-            location: formData.location,
-            issue: formData.issue,
-            advice: {
-              problem: `General advice for ${formData.crop} at ${formData.stage} stage`,
-              causes: ['Various factors may affect your crop'],
-              recommendations: [
-                'Monitor your crops regularly',
-                'Maintain proper irrigation',
-                'Use appropriate fertilizers',
-                'Watch for pests and diseases'
-              ],
-              timeline: {
-                immediate: 'Assess current crop condition',
-                short: 'Apply necessary treatments',
-                medium: 'Monitor growth and development',
-                long: 'Plan for next growing season'
-              },
-              expectedYield: 'Depends on management practices',
-              costs: 'Variable based on input requirements',
-              market: 'Check local market conditions'
-            }
-          });
-        }
-        setIsLoading(false);
-        return;
-      }
-
       const response = await axios.post('/api/advisory', {
         ...formData,
         language: language

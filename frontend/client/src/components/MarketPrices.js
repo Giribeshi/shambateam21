@@ -133,17 +133,6 @@ const MarketPrices = () => {
     setError('');
     
     try {
-      // Check if we're in demo mode (no backend)
-      if (window.location.hostname !== 'localhost') {
-        // Use demo data
-        const demoData = demoMarketPrices[selectedCrop];
-        setMarketData(demoData);
-        setPredictions(demoData.predictions);
-        setInsights(demoData.insights);
-        setIsLoading(false);
-        return;
-      }
-      
       const response = await axios.get(`/api/market/prices/${selectedCrop}`, {
         params: { language }
       });

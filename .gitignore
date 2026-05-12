@@ -4,8 +4,8 @@ client/node_modules/
 
 # Build outputs
 client/build/
-frontend/client/build/
 dist/
+# frontend/client/build is intentionally committed for Render deployment
 
 # Local DB & uploads
 backend/database/agrimind.db

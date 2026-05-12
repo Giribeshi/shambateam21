@@ -4,11 +4,15 @@ services:
     env: node
     plan: free
     region: frankfurt
-    buildCommand: npm install --omit=optional && npm --prefix frontend/client install && CI=false npm --prefix frontend/client run build
+    buildCommand: bash build.sh
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
+      - key: CI
+        value: "false"
+      - key: NODE_OPTIONS
+        value: "--max_old_space_size=512"
       - key: JWT_SECRET
         generateValue: true
     healthCheckPath: /api

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Stethoscope,
   Cloud,
@@ -13,7 +13,9 @@ import {
   ShieldCheck,
   Zap,
   Star,
+  PlayCircle,
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import { LogoMark } from './brand/Logo';
@@ -106,6 +108,16 @@ const T = {
 const Landing = () => {
   const { language } = useLanguage();
   const t = T[language] || T.en;
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const tryDemo = async () => {
+    setDemoLoading(true);
+    const result = await login('farmer@shambasmart.co.tz', 'farmer123');
+    setDemoLoading(false);
+    if (result?.success) navigate('/dashboard');
+  };
 
   return (
     <div className="min-h-screen bg-white text-ink-900">
@@ -155,7 +167,24 @@ const Landing = () => {
                 <Link to="/register" className="btn-primary text-base px-6 py-3">
                   {t.hero.cta1} <ArrowRight className="w-4 h-4" />
                 </Link>
-                <Link to="/login" className="btn-outline text-base px-6 py-3">{t.hero.cta2}</Link>
+                <button
+                  type="button"
+                  onClick={tryDemo}
+                  disabled={demoLoading}
+                  className="btn-outline text-base px-6 py-3"
+                >
+                  {demoLoading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                      {language === 'sw' ? 'Inafungua...' : 'Loading...'}
+                    </>
+                  ) : (
+                    <>
+                      <PlayCircle className="w-4 h-4" />
+                      {language === 'sw' ? 'Jaribu Bila Akaunti' : 'Try Live Demo'}
+                    </>
+                  )}
+                </button>
               </div>
 
               {/* Stats */}

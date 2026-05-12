@@ -28,6 +28,52 @@ class Database {
     await this.connect();
     await this.createTables();
     await this.seedDefaultUsers();
+    if (process.env.SEED_DEMO === 'true') {
+      await this.seedDemoFarmers();
+    }
+  }
+
+  async seedDemoFarmers() {
+    const demoFarmers = [
+      { name: 'Neema Joseph',     email: 'neema.j@demo.tz',    location: 'arusha',        farmSize: 'small',  crops: ['maize', 'beans'],            phone: '+255712110001' },
+      { name: 'Juma Mwangi',      email: 'juma.m@demo.tz',     location: 'kilimanjaro',   farmSize: 'medium', crops: ['coffee', 'beans'],           phone: '+255712110002' },
+      { name: 'Grace Mushi',      email: 'grace.m@demo.tz',    location: 'mbeya',         farmSize: 'small',  crops: ['rice', 'maize'],             phone: '+255712110003' },
+      { name: 'Hassan Said',      email: 'hassan.s@demo.tz',   location: 'morogoro',      farmSize: 'large',  crops: ['rice', 'cassava'],           phone: '+255712110004' },
+      { name: 'Amina Hamisi',     email: 'amina.h@demo.tz',    location: 'tanga',         farmSize: 'medium', crops: ['cassava', 'maize'],          phone: '+255712110005' },
+      { name: 'Peter Kileo',      email: 'peter.k@demo.tz',    location: 'iringa',        farmSize: 'small',  crops: ['tomatoes', 'onions'],        phone: '+255712110006' },
+      { name: 'Fatuma Bakari',    email: 'fatuma.b@demo.tz',   location: 'mwanza',        farmSize: 'medium', crops: ['rice', 'maize'],             phone: '+255712110007' },
+      { name: 'Daniel Maro',      email: 'daniel.m@demo.tz',   location: 'dodoma',        farmSize: 'small',  crops: ['sorghum', 'millet'],         phone: '+255712110008' },
+      { name: 'Esther Ng\'wandu', email: 'esther.n@demo.tz',   location: 'mbeya',         farmSize: 'medium', crops: ['maize', 'beans'],            phone: '+255712110009' },
+      { name: 'Salim Khalid',     email: 'salim.k@demo.tz',    location: 'zanzibar',      farmSize: 'small',  crops: ['cassava', 'tomatoes'],       phone: '+255712110010' },
+      { name: 'Rehema Mtui',      email: 'rehema.m@demo.tz',   location: 'arusha',        farmSize: 'large',  crops: ['maize', 'tomatoes', 'beans'],phone: '+255712110011' },
+      { name: 'Joseph Mlay',      email: 'joseph.m@demo.tz',   location: 'kilimanjaro',   farmSize: 'small',  crops: ['coffee'],                    phone: '+255712110012' },
+    ];
+
+    const password = await bcrypt.hash('demo123', 10);
+    const baseTime = Date.now();
+    let created = 0;
+
+    for (let i = 0; i < demoFarmers.length; i++) {
+      const f = demoFarmers[i];
+      if (await this.userExists(f.email)) continue;
+      // Stagger createdAt over the last 30 days for a realistic activity feed
+      const created_at = new Date(baseTime - (demoFarmers.length - i) * 1000 * 60 * 60 * 24 * 2.5).toISOString();
+      await this.insertUser({
+        id: `demo-${i + 10}`,
+        email: f.email,
+        password,
+        name: f.name,
+        role: 'farmer',
+        location: f.location,
+        phone: f.phone,
+        farmSize: f.farmSize,
+        primaryCrops: JSON.stringify(f.crops),
+        createdAt: created_at,
+        updatedAt: created_at,
+      });
+      created++;
+    }
+    if (created > 0) console.log(`Seeded ${created} demo farmers`);
   }
 
   async createTables() {

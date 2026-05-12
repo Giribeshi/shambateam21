@@ -20,11 +20,10 @@ const CROPS = [
   { emoji: '🌾', en: 'Rice',     sw: 'Mchele'  },
 ];
 
-// Tanzanian farm scene — Unsplash CDN, hot-linked, with graceful fallback
-const HERO_IMG =
-  'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1400&q=80';
+// Local auth background image (served from public/) with Unsplash fallback
+const HERO_IMG = '/auth-bg.jpg';
 const HERO_FALLBACK =
-  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80';
+  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=85';
 
 const AuthLayout = ({ children, language = 'en' }) => {
   const [imgSrc, setImgSrc] = React.useState(HERO_IMG);
@@ -33,19 +32,23 @@ const AuthLayout = ({ children, language = 'en' }) => {
     <div className="min-h-screen flex bg-white">
       {/* Visual side */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden text-white">
-        {/* Background photo */}
+        {/* Background photo — softly blurred for depth-of-field */}
         <img
           src={imgSrc}
           onError={() => setImgSrc(HERO_FALLBACK)}
-          alt="Tanzanian farmer in the field"
-          className="absolute inset-0 w-full h-full object-cover"
+          alt="Young seedling growing in soil"
+          className="absolute inset-0 w-full h-full object-cover scale-105"
           loading="eager"
         />
-        {/* Brand gradient overlay so text is readable + matches palette */}
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/85 via-brand-700/70 to-accent-600/55" />
-        <div className="absolute inset-0 bg-grid-faint [background-size:32px_32px] opacity-15" />
-        <div className="absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full bg-accent-300/25 blur-3xl" />
+        {/* Layered overlays: keep the seedling visible, darken edges for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/75 via-brand-800/55 to-emerald-900/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/25" />
+        <div className="absolute inset-0 bg-grid-faint [background-size:36px_36px] opacity-[0.08]" />
+        {/* Ambient warm glow matching the photo's golden-hour bokeh */}
+        <div className="absolute -top-32 -left-32 w-[420px] h-[420px] rounded-full bg-amber-200/15 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-[480px] h-[480px] rounded-full bg-emerald-400/15 blur-3xl" />
+        {/* Vignette */}
+        <div className="absolute inset-0 shadow-[inset_0_0_120px_40px_rgba(0,0,0,0.45)] pointer-events-none" />
 
         {/* Decorative crop chips floating */}
         <div className="hidden xl:block absolute top-24 right-10 animate-float">

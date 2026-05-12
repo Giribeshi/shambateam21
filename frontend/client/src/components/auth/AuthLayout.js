@@ -162,9 +162,9 @@ const AuthLayout = ({ children, language = 'en' }) => {
         className="flex-1 flex flex-col relative bg-cover bg-center"
         style={{ backgroundImage: `url(${FORM_BG})` }}
       >
-        {/* Soft overlay so the form remains readable on the seedling photo */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/80 to-emerald-50/85 backdrop-blur-[2px]" />
-        <div className="absolute inset-0 shadow-[inset_0_0_140px_30px_rgba(0,0,0,0.08)] pointer-events-none" />
+        {/* Light tint only — let the seedling show through clearly */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/15 via-transparent to-emerald-900/25" />
+        <div className="absolute inset-0 shadow-[inset_0_0_180px_40px_rgba(0,0,0,0.25)] pointer-events-none" />
 
         <div className="relative flex justify-end items-center gap-2 p-4 sm:p-6">
           <LanguageSwitcher />

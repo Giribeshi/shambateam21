@@ -56,10 +56,21 @@ h1, h2, h3, h4, h5, h6 {
   }
   .input {
     @apply w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-ink-900 placeholder:text-ink-400
-           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all;
+           focus:outline-none focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500
+           hover:border-slate-300 transition-all shadow-sm;
+  }
+  .input-error {
+    @apply border-rose-300 focus:ring-rose-500/20 focus:border-rose-500;
   }
   .label {
-    @apply block text-sm font-semibold text-ink-700 mb-2;
+    @apply block text-sm font-semibold text-ink-700 mb-1.5;
+  }
+  .auth-section-title {
+    @apply flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink-500 mb-3;
+  }
+  .auth-section-title::before, .auth-section-title::after {
+    content: '';
+    @apply flex-1 h-px bg-slate-200;
   }
   .chip {
     @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium;

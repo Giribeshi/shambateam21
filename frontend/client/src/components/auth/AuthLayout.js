@@ -20,10 +20,13 @@ const CROPS = [
   { emoji: '🌾', en: 'Rice',     sw: 'Mchele'  },
 ];
 
-// Local auth background image (served from public/) with Unsplash fallback
-const HERO_IMG = '/auth-bg.jpg';
+// Left-side hero (Tanzanian farm scene from Unsplash, with fallback)
+const HERO_IMG =
+  'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1400&q=80';
 const HERO_FALLBACK =
-  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=85';
+  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80';
+// Right-side form background — local seedling image
+const FORM_BG = '/auth-bg.jpg';
 
 const AuthLayout = ({ children, language = 'en' }) => {
   const [imgSrc, setImgSrc] = React.useState(HERO_IMG);
@@ -32,23 +35,19 @@ const AuthLayout = ({ children, language = 'en' }) => {
     <div className="min-h-screen flex bg-white">
       {/* Visual side */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden text-white">
-        {/* Background photo — softly blurred for depth-of-field */}
+        {/* Background photo */}
         <img
           src={imgSrc}
           onError={() => setImgSrc(HERO_FALLBACK)}
-          alt="Young seedling growing in soil"
-          className="absolute inset-0 w-full h-full object-cover scale-105"
+          alt="Tanzanian farmer in the field"
+          className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
         />
-        {/* Layered overlays: keep the seedling visible, darken edges for legibility */}
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/75 via-brand-800/55 to-emerald-900/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/25" />
-        <div className="absolute inset-0 bg-grid-faint [background-size:36px_36px] opacity-[0.08]" />
-        {/* Ambient warm glow matching the photo's golden-hour bokeh */}
-        <div className="absolute -top-32 -left-32 w-[420px] h-[420px] rounded-full bg-amber-200/15 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-[480px] h-[480px] rounded-full bg-emerald-400/15 blur-3xl" />
-        {/* Vignette */}
-        <div className="absolute inset-0 shadow-[inset_0_0_120px_40px_rgba(0,0,0,0.45)] pointer-events-none" />
+        {/* Brand gradient overlay so text is readable + matches palette */}
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/85 via-brand-700/70 to-accent-600/55" />
+        <div className="absolute inset-0 bg-grid-faint [background-size:32px_32px] opacity-15" />
+        <div className="absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full bg-accent-300/25 blur-3xl" />
 
         {/* Decorative crop chips floating */}
         <div className="hidden xl:block absolute top-24 right-10 animate-float">
@@ -159,12 +158,22 @@ const AuthLayout = ({ children, language = 'en' }) => {
       </div>
 
       {/* Form side */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex justify-end items-center gap-2 p-4 sm:p-6">
+      <div
+        className="flex-1 flex flex-col relative bg-cover bg-center"
+        style={{ backgroundImage: `url(${FORM_BG})` }}
+      >
+        {/* Soft overlay so the form remains readable on the seedling photo */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/80 to-emerald-50/85 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 shadow-[inset_0_0_140px_30px_rgba(0,0,0,0.08)] pointer-events-none" />
+
+        <div className="relative flex justify-end items-center gap-2 p-4 sm:p-6">
           <LanguageSwitcher />
         </div>
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-8">
-          <div className="w-full max-w-md">{children}</div>
+        <div className="relative flex-1 flex items-center justify-center px-4 sm:px-8 py-8">
+          {/* Form card — frosted white container so text is crisp over the photo */}
+          <div className="w-full max-w-md rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.18)] p-7 sm:p-9">
+            {children}
+          </div>
         </div>
       </div>
     </div>

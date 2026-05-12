@@ -7,9 +7,10 @@
     "start": "node server.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server.js",
-    "client": "cd frontend && npm start",
-    "build": "cd frontend && npm run build",
-    "install-client": "cd frontend && npm install"
+    "client": "npm --prefix frontend/client start",
+    "build": "npm --prefix frontend/client install && npm --prefix frontend/client run build",
+    "install-client": "npm --prefix frontend/client install",
+    "render-build": "npm install && npm run build"
   },
   "dependencies": {
     "@tensorflow-models/mobilenet": "^2.1.1",

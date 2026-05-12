@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, Sprout, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import AuthLayout from './AuthLayout';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -92,128 +93,103 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Logo and Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Sprout className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.title}</h1>
-            <p className="text-gray-600">{t.subtitle}</p>
+    <AuthLayout language={language}>
+      <div className="animate-slide-up">
+        <div className="lg:hidden flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-glow">
+            <Sprout className="w-5 h-5 text-white" />
           </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.email}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder={t.emailPlaceholder}
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.password}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder={t.passwordPlaceholder}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm">{error}</span>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <div className="loading-spinner mr-2"></div>
-                    {language === 'sw' ? 'Inaingia...' : 'Signing in...'}
-                  </div>
-                ) : (
-                  t.login
-                )}
-              </button>
-            </form>
-
-          {/* Demo Section */}
-          <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-            <div className="flex items-center justify-center mb-2">
-              <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-              <span className="text-sm font-medium text-green-900">Demo Account</span>
-            </div>
-            <p className="text-xs text-green-700 text-center mb-2">Try our demo account</p>
-            <div className="text-center">
-              <button 
-                onClick={fillDemoCredentials}
-                className="text-sm text-green-600 hover:text-green-700 font-medium underline cursor-pointer transition-colors"
-              >
-                farmer@shambasmart.co.tz / farmer123
-              </button>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              {t.noAccount}{' '}
-              <Link to="/register" className="font-medium text-green-600 hover:text-green-700 transition-colors">
-                {t.signUp}
-              </Link>
-            </p>
-          </div>
+          <span className="text-lg font-extrabold tracking-tight">Shambasmart</span>
         </div>
+
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">{t.title}</h1>
+        <p className="mt-2 text-ink-500">{t.subtitle}</p>
+
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <div>
+            <label className="label">{t.email}</label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="input pl-10"
+                placeholder={t.emailPlaceholder}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="label !mb-0">{t.password}</label>
+              <button type="button" className="text-xs font-semibold text-brand-700 hover:text-brand-800">
+                {t.forgotPassword}
+              </button>
+            </div>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="input pl-10 pr-10"
+                placeholder={t.passwordPlaceholder}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 text-rose-600 bg-rose-50 border border-rose-100 p-3 rounded-xl text-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <button type="submit" disabled={isSubmitting} className="btn-primary w-full text-base py-3">
+            {isSubmitting ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                {language === 'sw' ? 'Inaingia...' : 'Signing in...'}
+              </>
+            ) : t.login}
+          </button>
+        </form>
+
+        {/* Demo */}
+        <div className="mt-6 p-4 rounded-2xl bg-brand-50 border border-brand-100">
+          <div className="flex items-center gap-2 mb-1.5">
+            <CheckCircle className="w-4 h-4 text-brand-700" />
+            <span className="text-sm font-bold text-brand-800">{t.demoAccount}</span>
+          </div>
+          <p className="text-xs text-brand-700/80 mb-2">{t.demoCredentials}</p>
+          <button
+            onClick={fillDemoCredentials}
+            className="text-xs font-semibold text-brand-700 hover:text-brand-800 underline-offset-2 hover:underline"
+          >
+            farmer@shambasmart.co.tz · farmer123
+          </button>
+        </div>
+
+        <p className="mt-8 text-sm text-ink-500 text-center">
+          {t.noAccount}{' '}
+          <Link to="/register" className="font-semibold text-brand-700 hover:text-brand-800">
+            {t.signUp}
+          </Link>
+        </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const marketPrices = require('../modules/marketPrices');
-const { authenticateToken } = require('../middleware/auth');
+const marketPrices = require('../../utils/modules/marketPrices');
+const { authenticateToken } = require('../../middleware/middleware/auth');
 
 // Get all market prices for all crops
 router.get('/prices', authenticateToken, (req, res) => {

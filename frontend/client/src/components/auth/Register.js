@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, MapPin, Phone, Sprout, AlertCircle, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, MapPin, Phone, Sprout, AlertCircle, Ruler } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import AuthLayout from './AuthLayout';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -191,260 +192,146 @@ const Register = () => {
     setIsSubmitting(false);
   };
 
+  const passwordsMatch = !formData.confirmPassword || formData.password === formData.confirmPassword;
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
-        {/* Modern Register Card */}
-        <div className="card-glass p-8">
-          {/* Logo and Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 float-animation">
-              <Sprout className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-white mb-2">{t.title}</h1>
-            <p className="text-white/80">{t.subtitle}</p>
+    <AuthLayout language={language}>
+      <div className="animate-slide-up w-full max-w-xl">
+        <div className="lg:hidden flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-glow">
+            <Sprout className="w-5 h-5 text-white" />
           </div>
+          <span className="text-lg font-extrabold tracking-tight">Shambasmart</span>
+        </div>
 
-        {/* Modern Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Name Field */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  {t.name}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-white/60" />
-                  </div>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="input-glass w-full pl-10"
-                    placeholder={t.namePlaceholder}
-                    required
-                  />
-                </div>
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">{t.title}</h1>
+        <p className="mt-2 text-ink-500">{t.subtitle}</p>
+
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="label">{t.name}</label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+                <input type="text" name="name" value={formData.name} onChange={handleChange}
+                  className="input pl-10" placeholder={t.namePlaceholder} required />
               </div>
-
-              {/* Email Field */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  {t.email}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-white/60" />
-                  </div>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="input-glass w-full pl-10"
-                    placeholder={t.emailPlaceholder}
-                    required
-                  />
-                </div>
+            </div>
+            <div>
+              <label className="label">{t.email}</label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+                <input type="email" name="email" value={formData.email} onChange={handleChange}
+                  className="input pl-10" placeholder={t.emailPlaceholder} required />
               </div>
-
-              {/* Password Field */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  {t.password}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-white/60" />
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="input-glass w-full pl-10 pr-10"
-                    placeholder={t.passwordPlaceholder}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-white/60 hover:text-white/80" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-white/60 hover:text-white/80" />
-                    )}
-                  </button>
-                </div>
+            </div>
+            <div>
+              <label className="label">{t.password}</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+                <input type={showPassword ? 'text' : 'password'} name="password"
+                  value={formData.password} onChange={handleChange}
+                  className="input pl-10 pr-10" placeholder={t.passwordPlaceholder} required />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700">
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-
-              {/* Confirm Password Field */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  {t.confirmPassword}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-white/60" />
-                  </div>
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="input-glass w-full pl-10 pr-10"
-                    placeholder={t.confirmPasswordPlaceholder}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5 text-white/60 hover:text-white/80" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-white/60 hover:text-white/80" />
-                    )}
-                  </button>
-                </div>
+            </div>
+            <div>
+              <label className="label">{t.confirmPassword}</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+                <input type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword"
+                  value={formData.confirmPassword} onChange={handleChange}
+                  className={`input pl-10 pr-10 ${!passwordsMatch ? 'border-rose-300 focus:ring-rose-400' : ''}`}
+                  placeholder={t.confirmPasswordPlaceholder} required />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700">
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
+            </div>
 
-              {/* Location Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.location}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MapPin className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <select
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 appearance-none"
-                  >
-                    {Object.entries(t.locations).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Phone Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.phone}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder={t.phonePlaceholder}
-                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                  />
-                </div>
-              </div>
-
-              {/* Farm Size Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.farmSize}
-                </label>
-                <select
-                  name="farmSize"
-                  value={formData.farmSize}
-                  onChange={handleChange}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                >
-                  {Object.entries(t.farmSizes).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
+            <div>
+              <label className="label">{t.location}</label>
+              <div className="relative">
+                <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+                <select name="location" value={formData.location} onChange={handleChange}
+                  className="input pl-10 appearance-none pr-8">
+                  {Object.entries(t.locations).map(([v, l]) => (<option key={v} value={v}>{l}</option>))}
                 </select>
               </div>
-
-              {/* Primary Crops Field */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.primaryCrops}
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {Object.entries(t.crops).map(([value, label]) => (
-                    <label
-                      key={value}
-                      className="flex items-center space-x-2 p-2 border rounded-lg cursor-pointer hover:bg-green-50 transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.primaryCrops.includes(value)}
-                        onChange={() => handleCropToggle(value)}
-                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                      />
-                      <span className="text-sm text-gray-700">{label}</span>
-                    </label>
-                  ))}
-                </div>
+            </div>
+            <div>
+              <label className="label">{t.phone}</label>
+              <div className="relative">
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange}
+                  placeholder={t.phonePlaceholder} className="input pl-10" />
               </div>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm">{error}</span>
+            <div className="sm:col-span-2">
+              <label className="label">{t.farmSize}</label>
+              <div className="relative">
+                <Ruler className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+                <select name="farmSize" value={formData.farmSize} onChange={handleChange}
+                  className="input pl-10 appearance-none pr-8">
+                  {Object.entries(t.farmSizes).map(([v, l]) => (<option key={v} value={v}>{l}</option>))}
+                </select>
               </div>
-            )}
-
-            {/* Password Validation */}
-            {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-              <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm">{t.passwordMismatch}</span>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting || formData.password !== formData.confirmPassword}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>{language === 'en' ? 'Creating account...' : 'Inatengeneza akaunti...'}</span>
-                </>
-              ) : (
-                <span>{t.signUp}</span>
-              )}
-            </button>
-          </form>
-
-          {/* Footer Links */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              {t.hasAccount}{' '}
-              <Link 
-                to="/login" 
-                className="font-medium text-green-600 hover:text-green-700 transition-colors"
-              >
-                {t.signIn}
-              </Link>
-            </p>
+            </div>
           </div>
-        </div>
+
+          <div>
+            <label className="label">{t.primaryCrops}</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {Object.entries(t.crops).map(([value, label]) => {
+                const checked = formData.primaryCrops.includes(value);
+                return (
+                  <button key={value} type="button" onClick={() => handleCropToggle(value)}
+                    className={`px-3 py-2 rounded-xl border text-sm font-semibold transition-all
+                      ${checked
+                        ? 'bg-brand-600 border-brand-600 text-white shadow-glow'
+                        : 'bg-white border-slate-200 text-ink-700 hover:border-brand-300 hover:bg-brand-50'}`}>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 text-rose-600 bg-rose-50 border border-rose-100 p-3 rounded-xl text-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+          {!passwordsMatch && (
+            <div className="flex items-center gap-2 text-rose-600 bg-rose-50 border border-rose-100 p-3 rounded-xl text-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{t.passwordMismatch}</span>
+            </div>
+          )}
+
+          <button type="submit" disabled={isSubmitting || !passwordsMatch}
+            className="btn-primary w-full text-base py-3">
+            {isSubmitting ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                {language === 'en' ? 'Creating account...' : 'Inatengeneza akaunti...'}
+              </>
+            ) : t.signUp}
+          </button>
+        </form>
+
+        <p className="mt-8 text-sm text-ink-500 text-center">
+          {t.hasAccount}{' '}
+          <Link to="/login" className="font-semibold text-brand-700 hover:text-brand-800">{t.signIn}</Link>
+        </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../../models/models/User');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'shambasmart-jwt-secret-key-2024';
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
@@ -13,7 +15,7 @@ const authenticateToken = (req, res, next) => {
     });
   }
 
-  jwt.verify(token, 'shambasmart-jwt-secret-key-2024', (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json({ 
         error: 'Token invalid',
@@ -46,7 +48,7 @@ const optionalAuth = (req, res, next) => {
     return next();
   }
 
-  jwt.verify(token, 'shambasmart-jwt-secret-key-2024', (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
       req.user = null;
     } else {

@@ -6,20 +6,21 @@ const fs = require('fs');
 require('dotenv').config();
 
 // Initialize database
-const Database = require('./database/init');
+const Database = require('./backend/database/init');
 const database = new Database();
 
 // Import AI-powered modules
-const diseaseDiagnosis = require('./utils/modules/aiDiseaseDiagnosis');
-const farmingAdvisory = require('./utils/modules/farmingAdvisory');
-const cropRecommendation = require('./utils/modules/aiCropRecommendation');
-const weatherService = require('./utils/modules/aiWeatherService');
-const languageService = require('./utils/modules/aiLanguageService');
+const diseaseDiagnosis = require('./src/utils/modules/diseaseDiagnosis');
+const farmingAdvisory = require('./src/utils/modules/farmingAdvisory');
+const cropRecommendation = require('./src/utils/modules/cropRecommendation');
+const weatherService = require('./src/utils/modules/weatherService');
+const languageService = require('./src/utils/modules/aiLanguageService');
 
 // Import authentication and market routes
-const authRoutes = require('./routes/auth');
-const marketRoutes = require('./routes/market');
-const { authenticateToken, optionalAuth } = require('./middleware/auth');
+const authRoutes = require('./src/routes/routes/auth');
+const marketRoutes = require('./src/routes/routes/market');
+const adminRoutes = require('./src/routes/routes/admin');
+const { authenticateToken, optionalAuth } = require('./src/middleware/middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -59,8 +60,8 @@ const upload = multer({
   }
 });
 
-// Routes
-app.get('/', (req, res) => {
+// API health
+app.get('/api', (req, res) => {
   res.json({ message: 'Shambasmart API - Agricultural Assistant for Tanzanian Farmers' });
 });
 
@@ -69,6 +70,9 @@ app.use('/api/auth', authRoutes);
 
 // Market prices routes
 app.use('/api/market', marketRoutes);
+
+// Admin routes
+app.use('/api/admin', adminRoutes);
 
 // Disease Diagnosis (protected)
 app.post('/api/diagnose', authenticateToken, upload.single('image'), async (req, res) => {
@@ -167,6 +171,15 @@ app.use((error, req, res, next) => {
   console.error('Server error:', error);
   res.status(500).json({ error: 'Internal server error' });
 });
+
+// Serve React frontend build
+const frontendBuild = path.join(__dirname, 'frontend', 'client', 'build');
+if (fs.existsSync(frontendBuild)) {
+  app.use(express.static(frontendBuild));
+  app.get(/^\/(?!api|uploads).*/, (req, res) => {
+    res.sendFile(path.join(frontendBuild, 'index.html'));
+  });
+}
 
 // Start server
 async function startServer() {
